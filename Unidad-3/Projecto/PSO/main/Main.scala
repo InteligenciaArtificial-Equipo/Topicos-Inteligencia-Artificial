@@ -1,5 +1,6 @@
 //> using dep "org.scalanlp::breeze-viz:2.1.0"
 //> using dep "org.scalanlp::breeze:2.1.0"
+//> using resourceDir "data"
 
 package pso.main
 
@@ -83,7 +84,7 @@ object Main {
     val fieldCfg = FieldConfig(width, height, nx = 30, ny = 30)
     val simCfg = SimulationConfig(field = fieldCfg, nBumps = 0)
 
-    val csvPath = "/home/antonio17/Documents/Scala/PSO/data/cultivos_table.csv"
+    val csvPath = "data/cultivos_table.csv"
     if (!Files.exists(Path.of(csvPath))) {
       System.err.println(
         s"[FATAL] Observed CSV requerido pero no encontrado en: $csvPath"
