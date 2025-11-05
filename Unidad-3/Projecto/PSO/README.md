@@ -54,6 +54,10 @@ El código está organizado modularmente para separar la lógica de optimizació
 
 ## Ejecución
 
+<img width="457" height="781" alt="image" src="https://github.com/user-attachments/assets/48da8ea7-c0c1-48d4-ba4d-46013e841b84" />
+<img width="584" height="799" alt="image" src="https://github.com/user-attachments/assets/c0add614-4bc3-4393-8e02-6e53cc7da900" />
+<img width="601" height="405" alt="image" src="https://github.com/user-attachments/assets/68afad9e-fda4-4054-836d-77f4b8a736b6" />
+
 ### Requisitos
 
 * **Scala-CLI:** Utilizado para manejar dependencias y compilación.
