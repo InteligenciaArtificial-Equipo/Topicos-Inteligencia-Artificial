@@ -1,6 +1,11 @@
 #!/usr/bin/env python3
+
 """
 Reconocimiento de placas mejorado con múltiples métodos
+
+Este script implementa un sistema robusto de Reconocimiento Automático de Placas (ANPR) 
+combinando técnicas de preprocesamiento de imágenes de OpenCV y dos motores de OCR: 
+EasyOCR y Tesseract, para aumentar la tasa de éxito.
 """
 
 import sys
@@ -29,7 +34,6 @@ class PlateRecognizer:
     def __init__(self):
         self.readers = []
         
-        # Inicializar EasyOCR si está disponible
         if USE_EASYOCR:
             try:
                 self.easy_reader = easyocr.Reader(['en'], gpu=False)
@@ -47,13 +51,11 @@ class PlateRecognizer:
         if img is None:
             return None, None
         
-        # Redimensionar si es muy grande
         height, width = img.shape[:2]
         if width > 1000:
             scale = 1000 / width
             img = cv2.resize(img, None, fx=scale, fy=scale)
         
-        # Convertir a escala de grises
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         
         # Múltiples preprocesos
@@ -100,13 +102,10 @@ class PlateRecognizer:
         if not text:
             return None
         
-        # Convertir a mayúsculas y eliminar espacios
         cleaned = text.upper().strip()
         
-        # Remover caracteres especiales pero mantener letras y números
         cleaned = re.sub(r'[^A-Z0-9]', '', cleaned)
         
-        # Validar formato mínimo (al menos 5 caracteres, con letras y números)
         if len(cleaned) < 5:
             return None
         
@@ -116,7 +115,6 @@ class PlateRecognizer:
         if not (has_letters and has_numbers):
             return None
         
-        # Tomar primeros 6-7 caracteres (formato típico de placas)
         if len(cleaned) > 7:
             cleaned = cleaned[:7]
         
@@ -214,13 +212,12 @@ def main():
     
     if not recognizer.readers:
         print("ERROR: No hay métodos de OCR disponibles", file=sys.stderr)
-        print("Instala: pip install easyocr pytesseract", file=sys.stderr)
         sys.exit(1)
     
     result = recognizer.recognize(image_path)
     
     if result:
-        print(result)  # Esto es lo que captura Scala
+        print(result)
     else:
         print("", end="")
         sys.exit(1)
