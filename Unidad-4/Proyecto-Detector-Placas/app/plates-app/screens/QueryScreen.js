@@ -15,11 +15,35 @@ import { apiService } from '../services/api';
 import { CONFIG } from '../config';
 import { styles } from '../styles';
 
+/**
+ * QueryScreen
+ *
+ * Pantalla que permite al usuario tomar una foto de una placa vehicular,
+ * enviarla al backend para reconocimiento y mostrar el resultado (propietario).
+ *
+ * State interno:
+ * - image: objeto con la imagen tomada (assets[0] de Expo ImagePicker) o null.
+ * - loading: booleano que indica si la consulta está en curso.
+ * - result: objeto con el resultado devuelto por la API (o null).
+ *
+ * No recibe props (componente de pantalla autónomo).
+ *
+ * @returns {JSX.Element} Interfaz de la pantalla de consulta.
+ */
 export default function QueryScreen() {
   const [image, setImage] = useState(null);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
 
+  /**
+   * takePhoto
+   *
+   * Pide permisos de cámara y lanza el flujo de cámara de Expo.
+   * Si el usuario toma una foto, guarda el asset en `image` y lanza `queryPlate`
+   * pasándole la imagen en Base64 para su posterior envío al backend.
+   *
+   * @returns {Promise<void>}
+   */
   const takePhoto = async () => {
     // Pedir permisos
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
@@ -43,6 +67,17 @@ export default function QueryScreen() {
     }
   };
 
+  /**
+   * queryPlate
+   *
+   * Envía la imagen codificada en Base64 al servicio API para reconocimiento de placa.
+   * Gestiona el estado de carga y procesa la respuesta:
+   * - Si se encuentra un propietario, lo guarda en `result`.
+   * - Si no, muestra una alerta informando el fallo.
+   *
+   * @param {string} imageBase64 - Cadena Base64 de la imagen (sin prefijo data:).
+   * @returns {Promise<void>}
+   */
   const queryPlate = async (imageBase64) => {
     setLoading(true);
     setResult(null);
@@ -101,3 +136,4 @@ export default function QueryScreen() {
     </ScrollView>
   );
 }
+

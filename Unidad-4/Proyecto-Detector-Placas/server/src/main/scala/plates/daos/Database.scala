@@ -22,7 +22,13 @@ import scala.sys.process.*
 
 import plates.models.*
 
-object Database:
+object Database {
+  /**
+   * Crea y configura un transactor de Hikari para conectarse a la base de datos PostgreSQL.
+   * El transactor es el que permite ejecutar consultas Doobie dentro del efecto IO.
+   *
+   * @return Un Resource que administra el ciclo de vida del HikariTransactor[IO]
+   */
   def transactor: Resource[IO, HikariTransactor[IO]] =
     for
       xa <- HikariTransactor.newHikariTransactor[IO](
@@ -34,6 +40,14 @@ object Database:
       )
     yield xa
 
+  /**
+   * Busca un vehículo y su propietario a partir del número de placa.
+   *
+   * @param plateNum Número de placa a buscar.
+   * @return Una acción ConnectionIO que devuelve:
+   *         - Some(PlateWithOwner) si la placa existe
+   *         - None si no hay coincidencias
+   */
   def findOwnerByPlate(plateNum: String): ConnectionIO[Option[PlateWithOwner]] =
     sql"""
       SELECT p.id, p.plate_number, p.owner_id,
@@ -51,6 +65,12 @@ object Database:
         )
       })
 
+  /**
+   * Crea un nuevo propietario en la base de datos.
+   *
+   * @param name Nombre del propietario.
+   * @return Una acción ConnectionIO que devuelve el UUID del propietario creado.
+   */
   def createOwner(name: String): ConnectionIO[UUID] =
     val id = UUID.randomUUID()
     sql"""
@@ -58,6 +78,17 @@ object Database:
       VALUES ($id, $name)
     """.update.run.map(_ => id)
 
+
+  /**
+   * Crea una nueva placa o actualiza su propietario si ya existe.
+   *
+   * Si la placa ya existe, solo se actualiza el owner_id y la fecha de actualización.
+   * Si no existe, se inserta un nuevo registro.
+   *
+   * @param plateNum Número de placa.
+   * @param ownerId  UUID del propietario asociado.
+   * @return Una acción ConnectionIO que devuelve el UUID de la placa insertada o actualizada.
+   */
   def createOrUpdatePlate(plateNum: String, ownerId: UUID): ConnectionIO[UUID] =
     val id = UUID.randomUUID()
     sql"""
@@ -67,3 +98,4 @@ object Database:
       DO UPDATE SET owner_id = $ownerId, updated_at = NOW()
       RETURNING id
     """.query[UUID].unique
+}

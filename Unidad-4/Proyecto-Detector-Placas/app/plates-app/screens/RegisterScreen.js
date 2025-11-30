@@ -14,11 +14,39 @@ import { apiService } from '../services/api';
 import { CONFIG } from '../config';
 import { styles } from '../styles';
 
+/**
+ * RegisterScreen
+ *
+ * Pantalla encargada del registro manual de placas vehiculares
+ * junto con el nombre del propietario.
+ *
+ * State interno:
+ * - plateNumber: número de placa ingresado por el usuario.
+ * - ownerName: nombre del propietario.
+ * - loading: indica si la petición al servidor está en proceso.
+ *
+ * @returns {JSX.Element} Pantalla de registro de placas.
+ */
 export default function RegisterScreen() {
   const [plateNumber, setPlateNumber] = useState('');
   const [ownerName, setOwnerName] = useState('');
   const [loading, setLoading] = useState(false);
 
+  /**
+   * registerPlate
+   *
+   * Envía los datos de la placa y del propietario al backend para su registro.
+   * Antes de enviar la petición realiza validaciones básicas:
+   * - Que el número de placa no esté vacío.
+   * - Que el nombre del propietario no esté vacío.
+   *
+   * Maneja:
+   * - Estado de carga.
+   * - Respuesta exitosa.
+   * - Mensajes de error.
+   *
+   * @returns {Promise<void>}
+   */
   const registerPlate = async () => {
     // Validaciones
     if (!plateNumber.trim()) {
@@ -94,3 +122,4 @@ export default function RegisterScreen() {
     </ScrollView>
   );
 }
+

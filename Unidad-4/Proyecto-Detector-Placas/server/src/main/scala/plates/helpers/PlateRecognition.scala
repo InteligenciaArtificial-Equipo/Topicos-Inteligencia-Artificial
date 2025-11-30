@@ -20,10 +20,33 @@ import org.http4s.circe.*
 import java.util.{Base64, UUID}
 import scala.sys.process.*
 
-object PlateRecognition:
+
+/**
+ * Objeto encargado de la comunicación con el script de Python
+ * que realiza el reconocimiento de placas vehiculares.
+ */
+object PlateRecognition {
     
+  /**
+   * Ruta absoluta del script de Python que ejecuta el reconocimiento OCR.
+   */
   val path = "/home/antonio17/Documents/Scala/DetectorPlacas/server/src/main/py/recognize_plate.py"
 
+  /**
+   * Realiza el reconocimiento de una placa a partir de una imagen codificada en Base64.
+   * 
+   * El proceso consiste en:
+   * 1. Decodificar la imagen desde Base64.
+   * 2. Guardarla en un archivo temporal.
+   * 3. Ejecutar el script de Python pasándole la ruta del archivo.
+   * 4. Leer el resultado del reconocimiento.
+   * 5. Eliminar el archivo temporal.
+   *
+   * @param imageBase64 Imagen codificada en formato Base64.
+   * @return Un IO que devuelve:
+   *         - Some(String) con el número de placa reconocida si fue exitoso.
+   *         - None si ocurre un error o no se reconoce ninguna placa.
+   */
   def recognizePlate(imageBase64: String): IO[Option[String]] =
     IO {
       try
@@ -42,3 +65,4 @@ object PlateRecognition:
           println(s"Error en reconocimiento: ${e.getMessage}")
           None
     }
+}

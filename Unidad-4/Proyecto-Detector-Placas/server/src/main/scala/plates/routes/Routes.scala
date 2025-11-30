@@ -23,16 +23,57 @@ import scala.sys.process.*
 import plates.helpers.PlateRecognition
 import plates.daos.*
 
-object Routes:
+/**
+ * Definición de todas las rutas HTTP del sistema de detección de placas.
+ *
+ * Este objeto contiene:
+ * - Los decodificadores JSON necesarios.
+ * - Los endpoints para registro de placas.
+ * - Los endpoints para consulta por imagen.
+ */
+object Routes {
+  
+  /**
+   * Decodificador JSON para la petición de registro de placas.
+   */
   given EntityDecoder[IO, RegisterRequest] = jsonOf[IO, RegisterRequest]
+  
+  /**
+   * Decodificador JSON para la petición de consulta por imagen.
+   */
   given EntityDecoder[IO, QueryRequest] = jsonOf[IO, QueryRequest]
-  given EntityDecoder[IO, QueryByPlateRequest] = jsonOf[IO, QueryByPlateRequest]
 
+  /**
+   * Define el conjunto de rutas HTTP del servidor.
+   *
+   * @param xa Transactor de Doobie para ejecutar las consultas a la base de datos.
+   * @return Conjunto de rutas HttpRoutes[IO].
+   */
   def routes(xa: Transactor[IO]): HttpRoutes[IO] = HttpRoutes.of[IO] {
     
+    /**
+       * Endpoint de verificación de estado del servidor (health check).
+       *
+       * Método: GET
+       * Ruta: /health
+       * Respuesta: "OK" si el servidor está en funcionamiento.
+       */
     case GET -> Root / "health" =>
       Ok("OK")
 
+    /**
+       * Endpoint para registrar una placa con su propietario.
+       *
+       * Método: POST
+       * Ruta: /register
+       * Body JSON: RegisterRequest
+       * Flujo:
+       * 1. Se lee el JSON de la petición.
+       * 2. Se crea un nuevo propietario.
+       * 3. Se crea o actualiza la placa asociada.
+       * 4. Se consulta la relación placa-propietario.
+       * 5. Se responde con el resultado.
+       */
     case req @ POST -> Root / "register" =>
       println("Registrando placa ...")
       for
@@ -47,6 +88,18 @@ object Routes:
           case None => InternalServerError(ApiResponse(false, "Error al registrar placa").asJson)
       yield response
 
+    /**
+       * Endpoint para consultar el propietario de un vehículo a partir de una imagen.
+       *
+       * Método: POST
+       * Ruta: /query
+       * Body JSON: QueryRequest (contiene la imagen en Base64)
+       * Flujo:
+       * 1. Se decodifica la imagen.
+       * 2. Se ejecuta el reconocimiento de placa en Python.
+       * 3. Se busca la placa en la base de datos.
+       * 4. Se responde con el propietario si existe.
+       */
     case req @ POST -> Root / "query" =>
       println("Consultando ...")
       for
@@ -61,3 +114,5 @@ object Routes:
       yield response
 
   }
+}
+
